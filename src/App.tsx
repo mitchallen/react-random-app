@@ -82,7 +82,7 @@ function App() {
   random = getRandom(+minimum.value, +maximum.value);
 
   const handleRefresh = useCallback((event) => {
-      setRandom(getRandom(+minimum.value, +maximum.value));
+    setRandom(getRandom(+minimum.value, +maximum.value));
   }, [minimum, maximum])
 
   return (
