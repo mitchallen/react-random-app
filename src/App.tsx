@@ -79,11 +79,12 @@ function App() {
   let [random, setRandom] = useState(0);
 
   // this will generate a new value every time min or max is changed:
+  // Do NOT use setRandom here or you will get "Too many re-renders";
   random = getRandom(+minimum.value, +maximum.value);
 
   const handleRefresh = useCallback((event) => {
     setRandom(getRandom(+minimum.value, +maximum.value));
-  }, [minimum, maximum])
+  }, []);
 
   return (
     <Card style={AppStyles.cardStyle}>
