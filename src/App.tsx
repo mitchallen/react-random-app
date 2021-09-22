@@ -105,10 +105,20 @@ function App() {
             {...maximum}
           />
         </FormControl>
-        <FormControl style={{ margin: '10px', width: '100%' }} >
-          <Typography gutterBottom variant="h5" component="h2">
+        <FormControl style={{ marginTop: '30px', margin: '10px', width: '40%' }} >
+          <TextField
+            type='text'
+            value={random}
+            label='Random number'
+            helperText='Copy to clipboard'
+            variant='outlined'
+            inputProps={
+              { readOnly: true, }
+            }
+          />
+          {/* <Typography gutterBottom variant="h5" component="h2">
             {random}
-          </Typography>
+          </Typography> */}
         </FormControl>
       </CardContent>
       <CardActions style={AppStyles.childActionsStyle}>
