@@ -56,7 +56,7 @@ function App() {
     setSnackbarMessage(`Welcome!`);
   }, []); // <= only run onece
 
-  useEffect( () => {
+  useEffect(() => {
     // So that random can instantly refresh when min / max edited
     setRandom(getRandom(+minimum.value, +maximum.value));
   }, [minimum.value, maximum.value])
@@ -66,16 +66,20 @@ function App() {
   }, [minimum.value, maximum.value]);
 
   const handleCopy = useCallback((event) => {
-    navigator.clipboard.writeText(`${random}`).then(function() {
+    navigator.clipboard.writeText(`${random}`).then(function () {
       /* clipboard successfully set */
       setSnackbarOpen(true);
       setSnackbarMessage(`Copied '${random}' to clipboard`);
-    }, function() {
+    }, function () {
       /* clipboard write failed */
       setSnackbarOpen(true);
       setSnackbarMessage(`Error: could not copy to clipboard`);
     });
   }, [random]);
+
+  const handleMouseDownRandom = (event: any) => {
+    event.preventDefault();
+  };
 
   return (
     <React.Fragment>
@@ -107,43 +111,31 @@ function App() {
               {...maximum}
             />
           </FormControl>
-          {/* <FormControl style={{ marginTop: '30px', margin: '10px', width: '40%' }} >
-            <TextField
+          <FormControl sx={{ m: 1, width: '25ch' }} style={{ marginTop: '30px', margin: '10px', width: '40%' }} variant="outlined">
+            <InputLabel htmlFor="outlined-adornment-password">Random Number</InputLabel>
+            <OutlinedInput
+              id="outlined-adornment-random"
               type='text'
               value={random}
               label='Random number'
-              helperText='Copy to clipboard'
-              variant='outlined'
               inputProps={
                 { readOnly: true, }
               }
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="copy to clipboard"
+                    onClick={handleCopy}
+                    onMouseDown={handleMouseDownRandom}
+                    edge="end"
+                  >
+                    <ContentCopy />
+                  </IconButton>
+                </InputAdornment>
+              }
             />
-          </FormControl> */}
-          <FormControl sx={{ m: 1, width: '25ch' }} style={{ marginTop: '30px', margin: '10px', width: '40%' }} variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-password">Random Number</InputLabel>
-          <OutlinedInput
-            id="outlined-adornment-random"
-            type='text'
-            value={random}
-            label='Random number'
-            inputProps={
-              { readOnly: true, }
-            }
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={handleCopy}
-                  // onMouseDown={handleMouseDownRandom}
-                  edge="end"
-                >
-                  <ContentCopy />
-                </IconButton>
-              </InputAdornment>
-            }
-          />
-          <FormHelperText>Copy to clipboard</FormHelperText>
-        </FormControl>
+            <FormHelperText>Copy to clipboard</FormHelperText>
+          </FormControl>
         </CardContent>
         <CardActions style={AppStyles.childActionsStyle}>
           <Fab
