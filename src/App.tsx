@@ -1,47 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
-import { Card, CardActions, CardContent, Fab, FormControl, Snackbar, TextField, Typography } from '@mui/material';
+import { Card, CardActions, CardContent, Fab, FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, OutlinedInput, Snackbar, TextField, Typography } from '@mui/material';
 import { AppStyles } from './AppStyles';
 import { ContentCopy, Refresh, SmartToy } from '@mui/icons-material';
 import { Chance } from 'chance';
+import { useTextInput } from './hooks/use-text-input';
 
 const chance = new Chance();
-
-interface TextInput {
-  id?: string,
-  name?: string,
-  label?: string,
-  helperText?: string,
-  init?: string,
-}
-
-function useTextInput(options: TextInput = {}) {
-  let {
-    id = undefined,
-    name = undefined,
-    label = 'Text',
-    helperText = 'Enter text',
-    init = '',
-  } = options;
-
-  if (name === undefined) {
-    name = id;
-  }
-
-  const [value, setValue] = useState(init);
-  const handleValueChange = useCallback((event) => {
-    setValue(event.target.value);
-  }, []);
-
-  return {
-    id,
-    name,
-    label,
-    value,
-    onChange: handleValueChange,
-    helperText,
-  }
-}
 
 function useMinimumInput() {
   return useTextInput({
@@ -80,15 +45,21 @@ function App() {
     setSnackbarOpen(false);
   }, []);
 
-
   let minimum = useMinimumInput();
   let maximum = useMaximumInput();
 
   let [random, setRandom] = useState(getRandom(+minimum.value, +maximum.value));
 
-  // this will generate a new value every time min or max is changed:
-  // Do NOT use setRandom here or you will get "Too many re-renders";
-  // random = getRandom(+minimum.value, +maximum.value);
+  useEffect(() => {
+    // empty brackets for second argument will cause to only run on mount
+    setSnackbarOpen(true);
+    setSnackbarMessage(`Welcome!`);
+  }, []); // <= only run onece
+
+  useEffect( () => {
+    // So that random can instantly refresh when min / max edited
+    setRandom(getRandom(+minimum.value, +maximum.value));
+  }, [minimum.value, maximum.value])
 
   const handleRefresh = useCallback((event) => {
     setRandom(getRandom(+minimum.value, +maximum.value));
@@ -136,7 +107,7 @@ function App() {
               {...maximum}
             />
           </FormControl>
-          <FormControl style={{ marginTop: '30px', margin: '10px', width: '40%' }} >
+          {/* <FormControl style={{ marginTop: '30px', margin: '10px', width: '40%' }} >
             <TextField
               type='text'
               value={random}
@@ -147,22 +118,37 @@ function App() {
                 { readOnly: true, }
               }
             />
-            {/* <Typography gutterBottom variant="h5" component="h2">
-            {random}
-          </Typography> */}
-          </FormControl>
+          </FormControl> */}
+          <FormControl sx={{ m: 1, width: '25ch' }} style={{ marginTop: '30px', margin: '10px', width: '40%' }} variant="outlined">
+          <InputLabel htmlFor="outlined-adornment-password">Random Number</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-random"
+            type='text'
+            value={random}
+            label='Random number'
+            inputProps={
+              { readOnly: true, }
+            }
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleCopy}
+                  // onMouseDown={handleMouseDownRandom}
+                  edge="end"
+                >
+                  <ContentCopy />
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+          <FormHelperText>Copy to clipboard</FormHelperText>
+        </FormControl>
         </CardContent>
         <CardActions style={AppStyles.childActionsStyle}>
           <Fab
-            color="secondary"
-            size="medium"
-            aria-label="copy"
-            onClick={handleCopy}
-          >
-            <ContentCopy />
-          </Fab>
-          <Fab
             color="primary"
+            size="large"
             aria-label="refresh"
             onClick={handleRefresh}
           >
