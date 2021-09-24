@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { ChangeEventHandler, useCallback, useState } from "react";
 
 export interface TextInput {
     id?: string,
@@ -8,12 +8,21 @@ export interface TextInput {
     init?: string,
 }
 
+export interface TextInputProps {
+    id?: string,
+    name?: string,
+    label?: string,
+    value: string,
+    onChange: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement> | undefined,
+    helperText?: string,
+}
+
 export function useTextInput(options: TextInput = {}) {
     let {
         id = undefined,
         name = undefined,
         label = 'Text',
-        helperText = 'Enter text',
+        helperText = undefined,
         init = '',
     } = options;
 
@@ -22,7 +31,7 @@ export function useTextInput(options: TextInput = {}) {
     }
 
     const [value, setValue] = useState(init);
-    const handleValueChange = useCallback((event) => {
+    const onChange = useCallback((event) => {
         setValue(event.target.value);
     }, []);
 
@@ -31,7 +40,7 @@ export function useTextInput(options: TextInput = {}) {
         name,
         label,
         value,
-        onChange: handleValueChange,
+        onChange,
         helperText,
     }
 }

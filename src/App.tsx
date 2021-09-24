@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
-import { Card, CardActions, CardContent, Fab, FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, OutlinedInput, Snackbar, TextField, Typography } from '@mui/material';
+import { Card, CardActions, CardContent, Fab, FormControl, FormControlLabel, FormHelperText, IconButton, InputAdornment, InputLabel, OutlinedInput, Snackbar, Switch, TextField, Typography } from '@mui/material';
 import { AppStyles } from './AppStyles';
 import { ContentCopy, Refresh, SmartToy } from '@mui/icons-material';
 import { Chance } from 'chance';
-import { useTextInput } from './hooks/use-text-input';
+import { useTextInput } from './hooks/UseTextInput';
+import { TextInputControl } from './components/TextInputControl';
+import { useCheckedInput } from './components/CheckedInputControl';
 
 const chance = new Chance();
 
@@ -24,11 +26,19 @@ function useMaximumInput() {
   });
 }
 
-function getRandom(min: number, max: number) {
+function getRandom(min: number, max: number, isFloating = false) {
 
   if (Number.isNaN(min)) return 0;
   if (Number.isNaN(max)) return 0;
   if (min > max) return 0;
+
+  if( isFloating ) {
+    return chance.floating({
+      min: Math.round(min),
+      max: Math.round(max),
+      fixed: 2,
+    }); 
+  }
 
   return chance.integer({
     min: Math.round(min),
@@ -47,8 +57,9 @@ function App() {
 
   let minimum = useMinimumInput();
   let maximum = useMaximumInput();
+  let isFloat = useCheckedInput({ init: false });
 
-  let [random, setRandom] = useState(getRandom(+minimum.value, +maximum.value));
+  let [random, setRandom] = useState(getRandom(+minimum.value, +maximum.value, isFloat.checked));
 
   useEffect(() => {
     // empty brackets for second argument will cause to only run on mount
@@ -57,13 +68,13 @@ function App() {
   }, []); // <= only run onece
 
   useEffect(() => {
-    // So that random can instantly refresh when min / max edited
-    setRandom(getRandom(+minimum.value, +maximum.value));
-  }, [minimum.value, maximum.value])
+    // So that random can instantly refresh when min / max edited or floating changed
+    setRandom(getRandom(+minimum.value, +maximum.value, isFloat.checked));
+  }, [minimum.value, maximum.value, isFloat.checked])
 
   const handleRefresh = useCallback((event) => {
-    setRandom(getRandom(+minimum.value, +maximum.value));
-  }, [minimum.value, maximum.value]);
+    setRandom(getRandom(+minimum.value, +maximum.value, isFloat.checked));
+  }, [minimum.value, maximum.value, isFloat.checked]);
 
   const handleCopy = useCallback((event) => {
     navigator.clipboard.writeText(`${random}`).then(function () {
@@ -101,16 +112,33 @@ function App() {
           </Typography>
         </CardContent>
         <CardContent>
-          <FormControl style={{ margin: '10px', width: '40%' }} >
-            <TextField
-              {...minimum}
-            />
-          </FormControl>
+          {/* custom control */}
+          <TextInputControl
+            style={{ margin: '10px', width: '40%' }}
+            textInput={minimum}
+          />
           <FormControl style={{ margin: '10px', width: '40%' }} >
             <TextField
               {...maximum}
             />
           </FormControl>
+
+          <FormControl
+            style={{ margin: '10px', width: '40%' }}
+          >
+            <FormControlLabel
+              labelPlacement="top"
+              label='floating point'
+              control={
+                <Switch
+                  color="primary"
+                  {...isFloat}
+                />
+              }
+            />
+            <FormHelperText style={{ textAlign: 'center' }}>{'floating point'}</FormHelperText>
+          </FormControl>
+
           <FormControl sx={{ m: 1, width: '25ch' }} style={{ marginTop: '30px', margin: '10px', width: '40%' }} variant="outlined">
             <InputLabel htmlFor="outlined-adornment-password">Random Number</InputLabel>
             <OutlinedInput
